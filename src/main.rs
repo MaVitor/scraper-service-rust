@@ -143,7 +143,8 @@ async fn main() -> std::io::Result<()> {
             .service(health_check)
             .service(scrape_handler) // Registra o novo handler
     })
-    .bind(("127.0.0.1", port))?
+    // Bind para 0.0.0.0 para ser acessível de fora do contêiner
+    .bind(("0.0.0.0", port))?
     .run()
     .await
 }
