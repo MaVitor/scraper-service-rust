@@ -6,45 +6,38 @@ Este serviço faz parte de uma arquitetura maior de monitoramento de preços.
 
 ## Tecnologias Utilizadas
 
-- **Linguagem:** [Rust](https://www.rust-lang.org/)
-- **Framework Web:** [Actix Web](https://actix.rs/)
-- **Serialização/Deserialização:** [Serde](https://serde.rs/)
+- **Linguagem:** Rust (Edition 2024)
+- **Framework Web:** Actix Web
+- **Cliente HTTP:** Reqwest
 
-## Configuração do Ambiente
+## Como Executar (Com Docker Compose)
 
-Siga os passos abaixo para rodar este projeto localmente.
+Este serviço não foi projetado para ser executado de forma isolada. Ele é orquestrado pelo Docker Compose a partir do repositório principal da plataforma.
 
-### Pré-requisitos
-
-- **Rust:** É necessário ter a toolchain do Rust instalada via `rustup`. Veja em [rustup.rs](https://rustup.rs/).
-
-### Passos
-
-1.  **Clone o repositório e entre na branch de desenvolvimento:**
+1.  **Clone o repositório principal:**
     ```bash
-    git clone [https://github.com/seu-usuario/scraper-service-rust.git](https://github.com/seu-usuario/scraper-service-rust.git)
-    cd scraper-service-rust
-    git checkout develop
+    git clone [https://github.com/MaVitor/price-alert-platform.git](https://github.com/MaVitor/price-alert-platform.git)
+    cd price-alert-platform
     ```
 
-2.  **Compile e execute o projeto:**
+2.  **Suba o ambiente:**
+    O `docker-compose.yml` no diretório raiz cuidará de construir a imagem deste serviço e iniciá-lo junto com os outros.
     ```bash
-    cargo run
+    docker-compose up
     ```
-    O servidor estará disponível em `http://1227.0.0.1:8082`.
+    A API estará disponível na porta `8082` do seu host.
 
 ## API Endpoints
 
-A seguir estão os endpoints disponíveis na API.
+### Scrape de Produto
 
-### Health Check
-
-Verifica a saúde e a disponibilidade do serviço.
-
-- **Método:** `GET`
-- **Path:** `/health`
-- **Resposta de Sucesso (200 OK):**
+- **Método:** `POST`
+- **Path:** `/scrape`
+- **Corpo da Requisição (JSON):**
   ```json
   {
-    "status": "ok"
+    "url": "URL_DO_PRODUTO_NA_AMAZON"
   }
+Resposta de Sucesso (200 OK):{
+  "preco": 479.99
+}
