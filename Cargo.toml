@@ -1,7 +1,7 @@
 [package]
 name = "scraper-service-rust"
 version = "0.1.0"
-edition = "2024"
+edition = "2021" # Usando uma edição mais recente e estável
 
 [dependencies]
 actix-web = "4"
@@ -10,3 +10,4 @@ dotenv = "0.15"
 reqwest = { version = "0.11", features = ["json"] }
 regex = "1"
 lazy_static = "1.4"
+tokio = { version = "1", features = ["macros", "rt-multi-thread"] }

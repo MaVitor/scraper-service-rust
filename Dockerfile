@@ -35,11 +35,8 @@ WORKDIR /usr/local/bin
 # Copia apenas o binário compilado do estágio anterior
 COPY --from=builder /usr/src/app/target/release/scraper-service-rust .
 
-# Copia o .env para dentro do container para que a aplicação possa ler a API key
-COPY .env .
-
 # Expõe a porta que a aplicação vai usar
 EXPOSE 8082
 
 # Comando para iniciar o serviço quando o container subir
-CMD ["./scraper-service-rust"]
+CMD ["/usr/local/bin/scraper-service-rust"]

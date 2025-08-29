@@ -4,10 +4,8 @@ use lazy_static::lazy_static;
 use regex::Regex;
 use serde::{Deserialize, Serialize};
 use std::env;
-use std::fs; // Para manipulação de arquivos
 
 // Estruturas de Dados
-
 #[derive(Serialize)]
 struct HealthResponse {
     status: String,
@@ -24,7 +22,6 @@ struct ScrapeResponse {
 }
 
 // Lógica de Extração de Preço
-
 fn extract_price_from_html(html: &str) -> Option<f64> {
     lazy_static! {
         static ref PRICE_PATTERNS: Vec<Regex> = vec![
@@ -64,7 +61,6 @@ fn extract_price_from_html(html: &str) -> Option<f64> {
 }
 
 // Handlers da API
-
 #[get("/health")]
 async fn health_check() -> impl Responder {
     HttpResponse::Ok().json(HealthResponse {
@@ -79,7 +75,6 @@ async fn scrape_handler(req: web::Json<ScrapeRequest>) -> impl Responder {
         Err(_) => return HttpResponse::InternalServerError().json("ERRO: SCRAPER_API_KEY não definida no ambiente"),
     };
 
-    // Adicionando Headers customizados para simular um navegador real
     let mut headers = reqwest::header::HeaderMap::new();
     headers.insert(
         "User-Agent",
@@ -88,13 +83,11 @@ async fn scrape_handler(req: web::Json<ScrapeRequest>) -> impl Responder {
             .unwrap(),
     );
 
-    // Criando um cliente que usará esses headers em todas as requisições.
     let client = reqwest::Client::builder()
         .default_headers(headers)
         .build()
         .unwrap();
 
-    // &render=true e &premium=true para maior taxa de sucesso
     let scraper_url = format!(
         "http://api.scraperapi.com?api_key={}&url={}&render=true&premium=true",
         api_key, req.url
@@ -105,16 +98,11 @@ async fn scrape_handler(req: web::Json<ScrapeRequest>) -> impl Responder {
             if response.status().is_success() {
                 match response.text().await {
                     Ok(html_body) => {
-                        if let Err(e) = fs::write("debug_response.html", &html_body) {
-                            println!("Erro ao salvar arquivo de debug: {}", e);
-                        } else {
-                            println!("HTML de depuração salvo em 'debug_response.html'");
-                        }
-
+                        // A escrita do arquivo de debug foi removida para garantir a estabilidade no Docker.
                         if let Some(price) = extract_price_from_html(&html_body) {
                             HttpResponse::Ok().json(ScrapeResponse { preco: price })
                         } else {
-                            HttpResponse::NotFound().json("Preço não encontrado. Verifique 'debug_response.html' para análise.")
+                            HttpResponse::NotFound().json("Preço não encontrado no HTML.")
                         }
                     }
                     Err(_) => HttpResponse::InternalServerError().json("Erro ao ler o corpo da resposta HTML."),
@@ -122,7 +110,7 @@ async fn scrape_handler(req: web::Json<ScrapeRequest>) -> impl Responder {
             } else {
                 let status = response.status();
                 let body = response.text().await.unwrap_or_else(|_| "Corpo da resposta ilegível".to_string());
-                println!("ScraperAPI retornou erro: {} - {}", status, body); // Log de erro melhorado
+                println!("ScraperAPI retornou erro: {} - {}", status, body);
                 HttpResponse::BadGateway().json("ScraperAPI retornou um erro.")
             }
         }
@@ -131,19 +119,17 @@ async fn scrape_handler(req: web::Json<ScrapeRequest>) -> impl Responder {
 }
 
 // Função Principal
-
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
-    dotenv().ok(); // Carrega o arquivo .env
+    dotenv().ok();
     let port = 8082;
     println!("🚀 Servidor iniciado na porta {}", port);
 
     HttpServer::new(|| {
         App::new()
             .service(health_check)
-            .service(scrape_handler) // Registra o novo handler
+            .service(scrape_handler)
     })
-    // Bind para 0.0.0.0 para ser acessível de fora do contêiner
     .bind(("0.0.0.0", port))?
     .run()
     .await
