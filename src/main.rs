@@ -18,7 +18,7 @@ struct ScrapeRequest {
 
 #[derive(Serialize)]
 struct ScrapeResponse {
-    preco: f64,
+    price: f64, // <-- CORRIGIDO AQUI (de "preco" para "price")
 }
 
 // Lógica de Extração de Preço
@@ -100,7 +100,7 @@ async fn scrape_handler(req: web::Json<ScrapeRequest>) -> impl Responder {
                     Ok(html_body) => {
                         // A escrita do arquivo de debug foi removida para garantir a estabilidade no Docker.
                         if let Some(price) = extract_price_from_html(&html_body) {
-                            HttpResponse::Ok().json(ScrapeResponse { preco: price })
+                            HttpResponse::Ok().json(ScrapeResponse { price: price }) // <-- CORRIGIDO AQUI (de "preco" para "price")
                         } else {
                             HttpResponse::NotFound().json("Preço não encontrado no HTML.")
                         }
