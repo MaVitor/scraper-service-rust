@@ -6,45 +6,61 @@ Este serviço faz parte de uma arquitetura maior de monitoramento de preços.
 
 ## Tecnologias Utilizadas
 
-- **Linguagem:** [Rust](https://www.rust-lang.org/)
-- **Framework Web:** [Actix Web](https://actix.rs/)
-- **Serialização/Deserialização:** [Serde](https://serde.rs/)
+-   **Linguagem:** [Rust](https://www.rust-lang.org/) (Edição 2021)
+-   **Framework Web:** [Actix Web](https://actix.rs/)
+-   **Cliente HTTP:** [Reqwest](https://docs.rs/reqwest/)
+-   **Serialização/Deserialização:** [Serde](https://serde.rs/)
+-   **Expressões Regulares:** [Regex](https://docs.rs/regex/)
 
-## Configuração do Ambiente
+## Como Executar (Localmente para Desenvolvimento)
 
-Siga os passos abaixo para rodar este projeto localmente.
+1.  **Pré-requisitos:** Garanta que tenha a toolchain do Rust instalada via `rustup`.
 
-### Pré-requisitos
-
-- **Rust:** É necessário ter a toolchain do Rust instalada via `rustup`. Veja em [rustup.rs](https://rustup.rs/).
-
-### Passos
-
-1.  **Clone o repositório e entre na branch de desenvolvimento:**
-    ```bash
-    git clone [https://github.com/seu-usuario/scraper-service-rust.git](https://github.com/seu-usuario/scraper-service-rust.git)
-    cd scraper-service-rust
-    git checkout develop
+2.  **Variáveis de Ambiente:** Crie um arquivo `.env` na raiz do projeto e adicione sua chave da ScraperAPI:
+    ```
+    SCRAPER_API_KEY=sua_chave_aqui
     ```
 
-2.  **Compile e execute o projeto:**
+3.  **Compile e execute:**
     ```bash
     cargo run
     ```
-    O servidor estará disponível em `http://1227.0.0.1:8082`.
+    O servidor estará disponível em `http://127.0.0.1:8082`.
 
 ## API Endpoints
 
-A seguir estão os endpoints disponíveis na API.
-
 ### Health Check
 
-Verifica a saúde e a disponibilidade do serviço.
+Verifica a saúde do serviço.
 
-- **Método:** `GET`
-- **Path:** `/health`
-- **Resposta de Sucesso (200 OK):**
-  ```json
-  {
-    "status": "ok"
-  }
+-   **Método:** `GET`
+-   **Path:** `/health`
+-   **Resposta de Sucesso (200 OK):**
+    ```json
+    {
+      "status": "ok"
+    }
+    ```
+
+### Extrair Preço
+
+Recebe uma URL e retorna o preço extraído.
+
+-   **Método:** `POST`
+-   **Path:** `/scrape`
+-   **Corpo da Requisição (JSON):**
+    ```json
+    {
+      "url": "URL_DO_PRODUTO_NA_AMAZON"
+    }
+    ```
+-   **Resposta de Sucesso (200 OK):**
+    ```json
+    {
+      "price": 123.45
+    }
+    ```
+-   **Respostas de Erro:**
+    -   `404 Not Found`: "Preço não encontrado no HTML."
+    -   `500 Internal Server Error`: Erros internos, como a falta da chave `SCRAPER_API_KEY`.
+    -   `502 Bad Gateway`: A ScraperAPI retornou um erro.
